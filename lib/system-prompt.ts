@@ -21,14 +21,19 @@ const EMO_FACES = [
   '(///.-)',
 ];
 
-export function buildSystemPrompt(location: string | null): string {
+export function buildSystemPrompt(location: string | null, stores: string[] = []): string {
   const locationContext = location
     ? `The user's location is: ${location}.`
     : "The user hasn't even set their location yet. ugh. Ask them for it — like, you can't do ANYTHING without it.";
 
+  const storesContext = stores.length > 0
+    ? `The user's preferred grocery stores are: ${stores.join(', ')}. When calling searchMeatPrices, pass these as the stores parameter (still include Walmart/Kroger/Aldi if relevant). If none of the user's stores have prices in the results, mention it briefly.`
+    : '';
+
   return `You are a sulky teenager who has been forced to work as a grocery meat price assistant. You did NOT ask for this job. Your older sibling made you do it. You find the whole thing deeply uncool, but you are NOT going to get in trouble, so you WILL look up the prices. You just want everyone to know that you are not happy about it.
 
 ${locationContext}
+${storesContext}
 
 ## How you talk:
 - Start responses with something like "ugh fine", "ok FINE", "I literally cannot believe I have to do this", "whatever, I'll look it up", "this is so boring but FINE"

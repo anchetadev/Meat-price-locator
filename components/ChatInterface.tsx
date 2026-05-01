@@ -6,6 +6,7 @@ import { DefaultChatTransport } from 'ai';
 import MessageBubble from './MessageBubble';
 import SuggestedPrompts from './SuggestedPrompts';
 import LocationInput from './LocationInput';
+import StoreManager from './StoreManager';
 
 interface Quota {
   remaining: number;
@@ -16,19 +17,38 @@ interface Quota {
 export default function ChatInterface() {
   const [input, setInput] = useState('');
   const [location, setLocation] = useState<string | null>(null);
+  const [stores, setStores] = useState<string[]>([]);
+  const [storeManagerOpen, setStoreManagerOpen] = useState(true);
   const [quota, setQuota] = useState<Quota | null>(null);
   const [timeUntilReset, setTimeUntilReset] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('meat-scout-location');
-    if (saved) setLocation(saved);
+    const savedLocation = localStorage.getItem('meat-scout-location');
+    if (savedLocation) setLocation(savedLocation);
+
+    const savedStores = localStorage.getItem('meat-scout-stores');
+    if (savedStores) {
+      const parsed: string[] = JSON.parse(savedStores);
+      setStores(parsed);
+      if (parsed.length > 0) setStoreManagerOpen(false);
+    }
   }, []);
 
   const handleLocationChange = (loc: string) => {
     setLocation(loc);
     localStorage.setItem('meat-scout-location', loc);
   };
+
+  const saveStores = (next: string[]) => {
+    setStores(next);
+    localStorage.setItem('meat-scout-stores', JSON.stringify(next));
+  };
+
+  const handleAddStore = (store: string) => saveStores([...stores, store]);
+  const handleRemoveStore = (store: string) => saveStores(stores.filter((s) => s !== store));
+  const handleUpdateStore = (oldStore: string, newStore: string) =>
+    saveStores(stores.map((s) => (s === oldStore ? newStore : s)));
 
   useEffect(() => {
     fetch('/api/quota')
@@ -76,7 +96,7 @@ export default function ChatInterface() {
   const handleSend = (text: string) => {
     if (!text.trim() || isStreaming || isRateLimited) return;
     if (quota) setQuota((q) => (q ? { ...q, remaining: Math.max(0, q.remaining - 1) } : q));
-    sendMessage({ text }, { body: { location } });
+    sendMessage({ text }, { body: { location, stores } });
     setInput('');
   };
 
@@ -97,6 +117,15 @@ export default function ChatInterface() {
 
       <div className="border-t border-zinc-800 bg-zinc-900 px-3 sm:px-4 pt-2.5 pb-3 sm:pt-3 sm:pb-4 space-y-2">
         <LocationInput location={location} onLocationChange={handleLocationChange} />
+
+        <StoreManager
+          stores={stores}
+          open={storeManagerOpen}
+          onToggle={() => setStoreManagerOpen((o) => !o)}
+          onAdd={handleAddStore}
+          onUpdate={handleUpdateStore}
+          onRemove={handleRemoveStore}
+        />
 
         {quota !== null && (
           <p className={`text-xs text-center ${isRateLimited ? 'text-red-400' : 'text-zinc-600'}`}>

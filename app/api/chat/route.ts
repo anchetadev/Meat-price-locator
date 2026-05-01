@@ -19,12 +19,12 @@ export async function POST(req: Request) {
     }
   }
 
-  const { messages, location }: { messages: UIMessage[]; location: string | null } =
+  const { messages, location, stores }: { messages: UIMessage[]; location: string | null; stores?: string[] } =
     await req.json();
 
   const result = streamText({
     model: anthropic('claude-haiku-4-5-20251001'),
-    system: buildSystemPrompt(location),
+    system: buildSystemPrompt(location, stores),
     messages: await convertToModelMessages(messages),
     tools: { searchMeatPrices },
     stopWhen: stepCountIs(5),
