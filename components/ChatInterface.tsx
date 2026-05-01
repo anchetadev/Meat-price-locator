@@ -142,7 +142,7 @@ export default function ChatInterface() {
                 </>
               ) : (
                 <>
-                  okeeez that&apos;s ur searches for now!! ngl u did good today whatevs (///.-) come back in an hour and we&apos;ll do it all over again. lyk not that i care or anything. xx
+                  okeeez that&apos;s ur searches for now!! ngl u did good today whatevs (///.-) check back in like 24hrs and we&apos;ll do it all over again. lyk not that i care or anything. xx
                 </>
               )}
             </div>
