@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.73",
+    "@ai-sdk/deepseek": "^2.0.31",
     "@ai-sdk/react": "^3.0.174",
     "@tavily/core": "^0.7.3",
     "@upstash/ratelimit": "^2.0.8",

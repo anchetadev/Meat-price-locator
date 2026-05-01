@@ -1,4 +1,4 @@
-import { anthropic } from '@ai-sdk/anthropic';
+import { deepseek } from '@ai-sdk/deepseek';
 import { streamText, UIMessage, convertToModelMessages, stepCountIs } from 'ai';
 import { searchMeatPrices, searchArtist, searchBandOpinion } from '@/lib/tools';
 import { buildSystemPrompt } from '@/lib/system-prompt';
@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     await req.json();
 
   const result = streamText({
-    model: anthropic('claude-haiku-4-5-20251001'),
+    model: deepseek('deepseek-chat'),
     system: buildSystemPrompt(location, stores),
     messages: await convertToModelMessages(messages),
     tools: { searchMeatPrices, searchArtist, searchBandOpinion },
