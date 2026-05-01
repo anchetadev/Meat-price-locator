@@ -2,7 +2,11 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { tavily } from '@tavily/core';
 
-const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY! });
+let _tvly: ReturnType<typeof tavily> | null = null;
+function getTvly() {
+  if (!_tvly) _tvly = tavily({ apiKey: process.env.TAVILY_API_KEY! });
+  return _tvly;
+}
 
 export const searchMeatPrices = tool({
   description:
@@ -25,7 +29,7 @@ export const searchMeatPrices = tool({
     const searchQuery = `${query} price per pound ${location} ${storeFragment} grocery store 2025`;
 
     try {
-      const response = await tvly.search(searchQuery, {
+      const response = await getTvly().search(searchQuery, {
         searchDepth: 'advanced',
         maxResults: 8,
         topic: 'general',
