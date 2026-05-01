@@ -12,11 +12,9 @@ function getIp(req: Request): string {
 
 export async function POST(req: Request) {
   const ip = getIp(req);
-  if (ip !== '127.0.0.1' && ip !== '::1') {
-    const { success, reset, remaining } = await ratelimit.limit(ip);
-    if (!success) {
-      return Response.json({ error: 'rate_limited', reset, remaining: 0 }, { status: 429 });
-    }
+  const { success, reset, remaining } = await ratelimit.limit(ip);
+  if (!success) {
+    return Response.json({ error: 'rate_limited', reset, remaining: 0 }, { status: 429 });
   }
 
   const { messages, location, stores }: { messages: UIMessage[]; location: string | null; stores?: string[] } =
