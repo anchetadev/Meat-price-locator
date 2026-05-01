@@ -167,7 +167,7 @@ export default function ChatInterface() {
         )}
         {goodbyeType && (
           <div className="flex justify-start">
-            <div className="bg-zinc-800 border border-zinc-700 rounded-2xl rounded-tl-sm px-3 py-2 max-w-[85%] text-sm text-zinc-100 leading-relaxed">
+            <div className="max-w-[92%] sm:max-w-[85%] rounded-2xl px-3 sm:px-4 py-2.5 sm:py-3 text-sm leading-relaxed bg-zinc-800 text-zinc-100 rounded-bl-sm border border-zinc-700">
               {goodbyeType === 'music' ? (
                 <>
                   nooooo wait wait x.x u ran out of searches (╥Д╥) and lyke... we were having SO much fun talking abt music asdfghjkl ok hold on. ok. i just reset ur searches bc honestly?? i dgaf how much it costs Angel lmaooo i just rllyyyy want u to stay ok?? don&apos;t tell anyone xD ur good to go!!
