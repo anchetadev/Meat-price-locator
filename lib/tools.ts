@@ -25,8 +25,8 @@ export const searchMeatPrices = tool({
       .describe('Optional specific stores to target, e.g. "Walmart Kroger Aldi"'),
   }),
   execute: async ({ query, location, stores }) => {
-    const storeFragment = stores ?? 'Walmart Kroger Aldi Publix HEB Safeway Costco Target';
-    const searchQuery = `${query} price per pound ${location} ${storeFragment} grocery store 2025`;
+    const storeFragment = stores ?? 'Walmart Kroger Aldi Safeway Costco Target Trader Joe\'s Whole Foods';
+    const searchQuery = `${query} price per pound near ${location} ${storeFragment} grocery store 2025`;
 
     try {
       const response = await getTvly().search(searchQuery, {
