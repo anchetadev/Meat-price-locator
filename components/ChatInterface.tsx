@@ -131,6 +131,7 @@ export default function ChatInterface() {
     if (quota) setQuota((q) => (q ? { ...q, remaining: Math.max(0, q.remaining - 1) } : q));
     sendMessage({ text }, { body: { location, stores } });
     setInput('');
+    fetch('/api/quota').then((r) => r.json()).then(setQuota).catch(() => {});
   };
 
   useEffect(() => {
