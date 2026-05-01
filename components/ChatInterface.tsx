@@ -89,6 +89,9 @@ export default function ChatInterface() {
     onError: () => {
       fetch('/api/quota').then((r) => r.json()).then(setQuota).catch(() => {});
     },
+    onFinish: () => {
+      fetch('/api/quota').then((r) => r.json()).then(setQuota).catch(() => {});
+    },
   });
 
   const isStreaming = status === 'streaming' || status === 'submitted';
@@ -111,7 +114,7 @@ export default function ChatInterface() {
         }
       }
     }
-    if (musicCount > meatCount) {
+    if (musicCount >= meatCount) {
       setGoodbyeType('music');
       fetch('/api/reset-quota', { method: 'POST' })
         .then(() => fetch('/api/quota'))
@@ -182,7 +185,12 @@ export default function ChatInterface() {
                 )}
               </>
             ) : (
-              <>{quota.remaining} of {quota.limit} searches remaining today</>
+              <>
+                {quota.remaining} of {quota.limit} searches remaining today
+                {timeUntilReset && (
+                  <> · resets in <span className="font-mono">{timeUntilReset}</span></>
+                )}
+              </>
             )}
           </p>
         )}
