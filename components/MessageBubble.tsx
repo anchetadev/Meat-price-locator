@@ -10,10 +10,32 @@ interface Props {
 }
 
 function parsePriceBlock(text: string): { priceTable: string | null; cleanText: string } {
-  const match = text.match(/---PRICES---\n([\s\S]*?)\n---END-PRICES---/);
+  // Accept optional whitespace after opening marker, and ---PRICES--- as fallback closing tag
+  const match = text.match(/---PRICES---[ \t]*\n?([\s\S]*?)\n?---(?:END-)?PRICES---/);
   if (!match) return { priceTable: null, cleanText: text };
-  const priceTable = match[1];
-  const cleanText = text.replace(/---PRICES---\n[\s\S]*?\n---END-PRICES---\n?/, '').trim();
+
+  let priceTable = match[1].trim();
+
+  // Normalize compact single-line output: split after URLs before the next store name
+  if (priceTable && !priceTable.includes('\n')) {
+    priceTable = priceTable.replace(/(https?:\/\/[^\s|]+)\s+(?=[A-Za-z])/g, '$1\n');
+  }
+
+  // For any line with more than 5 pipe-delimited fields, split every 5 into separate rows
+  priceTable = priceTable
+    .split('\n')
+    .flatMap((line) => {
+      const parts = line.split(' | ');
+      if (parts.length <= 5) return [line];
+      const rows: string[] = [];
+      for (let i = 0; i < parts.length; i += 5) {
+        rows.push(parts.slice(i, i + 5).join(' | '));
+      }
+      return rows;
+    })
+    .join('\n');
+
+  const cleanText = text.replace(/---PRICES---[\s\S]*?---(?:END-)?PRICES---\n?/, '').trim();
   return { priceTable, cleanText };
 }
 

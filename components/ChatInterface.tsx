@@ -98,6 +98,17 @@ export default function ChatInterface() {
   const isEmpty = messages.length === 0;
   const isRateLimited = quota !== null && quota.remaining <= 0;
 
+  // Refresh quota from server whenever streaming finishes (covers onFinish + tool-call steps)
+  const wasStreamingRef2 = useRef(false);
+  useEffect(() => {
+    if (isStreaming) {
+      wasStreamingRef2.current = true;
+    } else if (wasStreamingRef2.current) {
+      wasStreamingRef2.current = false;
+      fetch('/api/quota').then((r) => r.json()).then(setQuota).catch(() => {});
+    }
+  }, [isStreaming]);
+
   useEffect(() => {
     if (!isRateLimited || goodbyeShownRef.current || messages.length === 0) return;
     goodbyeShownRef.current = true;
@@ -128,10 +139,17 @@ export default function ChatInterface() {
 
   const handleSend = (text: string) => {
     if (!text.trim() || isStreaming || isRateLimited) return;
-    if (quota) setQuota((q) => (q ? { ...q, remaining: Math.max(0, q.remaining - 1) } : q));
+    setQuota((q) => {
+      if (!q) return q;
+      return {
+        ...q,
+        remaining: Math.max(0, q.remaining - 1),
+        // Optimistically start the window timer on first send if not yet set
+        reset: q.reset || Date.now() + 3600 * 1000,
+      };
+    });
     sendMessage({ text }, { body: { location, stores } });
     setInput('');
-    fetch('/api/quota').then((r) => r.json()).then(setQuota).catch(() => {});
   };
 
   useEffect(() => {
