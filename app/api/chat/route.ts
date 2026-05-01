@@ -1,6 +1,6 @@
 import { anthropic } from '@ai-sdk/anthropic';
 import { streamText, UIMessage, convertToModelMessages, stepCountIs } from 'ai';
-import { searchMeatPrices } from '@/lib/tools';
+import { searchMeatPrices, searchArtist, searchBandOpinion } from '@/lib/tools';
 import { buildSystemPrompt } from '@/lib/system-prompt';
 import { ratelimit } from '@/lib/ratelimit';
 
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     model: anthropic('claude-haiku-4-5-20251001'),
     system: buildSystemPrompt(location, stores),
     messages: await convertToModelMessages(messages),
-    tools: { searchMeatPrices },
+    tools: { searchMeatPrices, searchArtist, searchBandOpinion },
     stopWhen: stepCountIs(10),
   });
 

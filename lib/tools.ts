@@ -59,3 +59,93 @@ export const searchMeatPrices = tool({
     }
   },
 });
+
+export const searchArtist = tool({
+  description:
+    'Look up an artist or band on Last.fm — returns bio, listener count, top albums, top tracks, and similar artists. ' +
+    'Use this when the user mentions any emo, scene, screamo, or metal band.',
+  inputSchema: z.object({
+    artist: z.string().describe('The artist or band name, e.g. "Pierce the Veil", "Paramore", "My Chemical Romance"'),
+  }),
+  execute: async ({ artist }) => {
+    const key = process.env.LAST_FM_API_KEY!;
+    const base = 'https://ws.audioscrobbler.com/2.0/';
+    const params = (method: string, extra = '') =>
+      `${base}?method=${method}&artist=${encodeURIComponent(artist)}&api_key=${key}&format=json${extra}`;
+
+    try {
+      const [infoRes, albumsRes, tracksRes, similarRes] = await Promise.all([
+        fetch(params('artist.getInfo')),
+        fetch(params('artist.getTopAlbums', '&limit=8')),
+        fetch(params('artist.getTopTracks', '&limit=5')),
+        fetch(params('artist.getSimilar', '&limit=5')),
+      ]);
+
+      const [info, albums, tracks, similar] = await Promise.all([
+        infoRes.json(),
+        albumsRes.json(),
+        tracksRes.json(),
+        similarRes.json(),
+      ]);
+
+      const rawBio: string = info.artist?.bio?.summary ?? '';
+      const bio = rawBio.replace(/<a\b[^>]*>.*?<\/a>/gi, '').replace(/<[^>]+>/g, '').trim();
+
+      return {
+        artist,
+        listeners: info.artist?.stats?.listeners ?? null,
+        playcount: info.artist?.stats?.playcount ?? null,
+        tags: (info.artist?.tags?.tag ?? []).map((t: { name: string }) => t.name),
+        bio: bio.slice(0, 600) || null,
+        topAlbums: (albums.topalbums?.album ?? []).map((a: { name: string; playcount: number }) => ({
+          name: a.name,
+          playcount: a.playcount,
+        })),
+        topTracks: (tracks.toptracks?.track ?? []).map((t: { name: string; playcount: number; listeners: number }) => ({
+          name: t.name,
+          playcount: t.playcount,
+          listeners: t.listeners,
+        })),
+        similarArtists: (similar.similarartists?.artist ?? []).map((a: { name: string }) => a.name),
+      };
+    } catch {
+      return { artist, error: 'Last.fm lookup failed.', listeners: null, topAlbums: [], topTracks: [], similarArtists: [] };
+    }
+  },
+});
+
+export const searchBandOpinion = tool({
+  description:
+    'Search the web for fan reception, critical reviews, cultural impact, and public opinion on a band or artist. ' +
+    'Use alongside searchArtist for a fuller picture — especially for favorite bands.',
+  inputSchema: z.object({
+    artist: z.string().describe('The artist or band name'),
+    angle: z
+      .string()
+      .optional()
+      .describe('Specific angle to search, e.g. "fan reception", "critical acclaim", "legacy impact", "controversy"'),
+  }),
+  execute: async ({ artist, angle }) => {
+    const searchQuery = `${artist} ${angle ?? 'fan reception legacy cultural impact review'} band`;
+
+    try {
+      const response = await getTvly().search(searchQuery, {
+        searchDepth: 'advanced',
+        maxResults: 5,
+        topic: 'general',
+      });
+
+      return {
+        artist,
+        searchQuery,
+        results: response.results.map((r) => ({
+          title: r.title,
+          url: r.url,
+          snippet: r.content,
+        })),
+      };
+    } catch {
+      return { artist, searchQuery, results: [], error: 'Search failed.' };
+    }
+  },
+});
