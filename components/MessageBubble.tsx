@@ -1,6 +1,7 @@
 'use client';
 
 import { UIMessage } from 'ai';
+import ReactMarkdown from 'react-markdown';
 import PriceCard from './PriceCard';
 import ToolCallIndicator from './ToolCallIndicator';
 
@@ -34,7 +35,26 @@ export default function MessageBubble({ message }: Props) {
             return (
               <div key={i}>
                 {priceTable && <PriceCard rawTable={priceTable} />}
-                {cleanText && <p className="whitespace-pre-wrap">{cleanText}</p>}
+                {cleanText && (
+                  <ReactMarkdown
+                    components={{
+                      p: ({ children }) => <p className="mb-1 last:mb-0">{children}</p>,
+                      strong: ({ children }) => <strong className="font-semibold text-white">{children}</strong>,
+                      em: ({ children }) => <em className="italic">{children}</em>,
+                      ul: ({ children }) => <ul className="list-disc list-inside my-1 space-y-0.5">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal list-inside my-1 space-y-0.5">{children}</ol>,
+                      li: ({ children }) => <li className="text-zinc-100">{children}</li>,
+                      code: ({ children }) => <code className="bg-zinc-700 rounded px-1 py-0.5 text-xs font-mono">{children}</code>,
+                      a: ({ href, children }) => (
+                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline text-red-400 hover:text-red-300">
+                          {children}
+                        </a>
+                      ),
+                    }}
+                  >
+                    {cleanText}
+                  </ReactMarkdown>
+                )}
               </div>
             );
           }
