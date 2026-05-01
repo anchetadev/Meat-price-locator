@@ -4,7 +4,7 @@ import { searchMeatPrices } from '@/lib/tools';
 import { buildSystemPrompt } from '@/lib/system-prompt';
 import { ratelimit } from '@/lib/ratelimit';
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 function getIp(req: Request): string {
   return req.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? '127.0.0.1';
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     system: buildSystemPrompt(location, stores),
     messages: await convertToModelMessages(messages),
     tools: { searchMeatPrices },
-    stopWhen: stepCountIs(5),
+    stopWhen: stepCountIs(10),
   });
 
   return result.toUIMessageStreamResponse();
