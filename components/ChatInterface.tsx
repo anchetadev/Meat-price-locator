@@ -145,7 +145,7 @@ export default function ChatInterface() {
         ...q,
         remaining: Math.max(0, q.remaining - 1),
         // Optimistically start the window timer on first send if not yet set
-        reset: q.reset || Date.now() + 3600 * 1000,
+        reset: q.reset || Date.now() + 86400 * 1000,
       };
     });
     sendMessage({ text }, { body: { location, stores } });

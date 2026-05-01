@@ -13,7 +13,7 @@ function getInstance(): Ratelimit | null {
   if (!_instance) {
     _instance = new Ratelimit({
       redis: new Redis({ url, token }),
-      limiter: Ratelimit.fixedWindow(DAILY_LIMIT, '1 h'),
+      limiter: Ratelimit.fixedWindow(DAILY_LIMIT, '24 h'),
       prefix: 'meat-scout',
     });
   }
