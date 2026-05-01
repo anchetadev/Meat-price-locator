@@ -110,7 +110,8 @@ export default function ChatInterface() {
   }, [isStreaming]);
 
   useEffect(() => {
-    if (!isRateLimited || goodbyeShownRef.current || messages.length === 0) return;
+    // Wait until streaming finishes so the goodbye lands after the final response
+    if (!isRateLimited || isStreaming || goodbyeShownRef.current || messages.length === 0) return;
     goodbyeShownRef.current = true;
 
     let musicCount = 0;
@@ -135,7 +136,7 @@ export default function ChatInterface() {
     } else {
       setGoodbyeType('meat');
     }
-  }, [isRateLimited, messages]);
+  }, [isRateLimited, isStreaming, messages]);
 
   const handleSend = (text: string) => {
     if (!text.trim() || isStreaming || isRateLimited) return;
@@ -154,7 +155,7 @@ export default function ChatInterface() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, goodbyeType]);
 
   return (
     <div className="flex flex-col h-full max-w-3xl mx-auto w-full">
