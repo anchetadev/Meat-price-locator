@@ -5,10 +5,7 @@ import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import MessageBubble from './MessageBubble';
 import SuggestedPrompts from './SuggestedPrompts';
-
-interface Props {
-  location: string | null;
-}
+import LocationInput from './LocationInput';
 
 interface Quota {
   remaining: number;
@@ -16,11 +13,22 @@ interface Quota {
   reset: number | null;
 }
 
-export default function ChatInterface({ location }: Props) {
+export default function ChatInterface() {
   const [input, setInput] = useState('');
+  const [location, setLocation] = useState<string | null>(null);
   const [quota, setQuota] = useState<Quota | null>(null);
   const [timeUntilReset, setTimeUntilReset] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('meat-scout-location');
+    if (saved) setLocation(saved);
+  }, []);
+
+  const handleLocationChange = (loc: string) => {
+    setLocation(loc);
+    localStorage.setItem('meat-scout-location', loc);
+  };
 
   useEffect(() => {
     fetch('/api/quota')
@@ -87,15 +95,11 @@ export default function ChatInterface({ location }: Props) {
         <div ref={bottomRef} />
       </div>
 
-      <div className="border-t border-zinc-800 bg-zinc-900 px-3 sm:px-4 py-2.5 sm:py-3">
-        {!location && (
-          <p className="text-amber-400 text-xs mb-2 text-center">
-            Set your location above for accurate local prices
-          </p>
-        )}
+      <div className="border-t border-zinc-800 bg-zinc-900 px-3 sm:px-4 pt-2.5 pb-3 sm:pt-3 sm:pb-4 space-y-2">
+        <LocationInput location={location} onLocationChange={handleLocationChange} />
 
         {quota !== null && (
-          <p className={`text-xs mb-2 text-center ${isRateLimited ? 'text-red-400' : 'text-zinc-500'}`}>
+          <p className={`text-xs text-center ${isRateLimited ? 'text-red-400' : 'text-zinc-600'}`}>
             {isRateLimited ? (
               <>
                 Daily limit reached
@@ -104,9 +108,7 @@ export default function ChatInterface({ location }: Props) {
                 )}
               </>
             ) : (
-              <>
-                {quota.remaining} of {quota.limit} searches remaining today
-              </>
+              <>{quota.remaining} of {quota.limit} searches remaining today</>
             )}
           </p>
         )}

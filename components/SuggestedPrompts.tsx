@@ -21,7 +21,7 @@ export default function SuggestedPrompts({ onSelect, location }: Props) {
         <p className="text-zinc-400 text-sm mt-1.5 sm:mt-2 max-w-xs sm:max-w-sm">
           {location
             ? `Ask me about meat prices near ${location}`
-            : 'Set your location above to get accurate local prices'}
+            : 'Set your location below to find local prices'}
         </p>
       </div>
       <div className="flex flex-wrap gap-1.5 sm:gap-2 justify-center w-full max-w-lg">
