@@ -33,4 +33,6 @@ export const ratelimit = {
   getRemaining: (identifier: string) =>
     getInstance()?.getRemaining(identifier) ??
     Promise.resolve({ remaining: DAILY_LIMIT, reset: 0, limit: DAILY_LIMIT }),
+  resetUsedTokens: (identifier: string) =>
+    getInstance()?.resetUsedTokens(identifier) ?? Promise.resolve(),
 };

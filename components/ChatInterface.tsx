@@ -111,7 +111,16 @@ export default function ChatInterface() {
         }
       }
     }
-    setGoodbyeType(musicCount > meatCount ? 'music' : 'meat');
+    if (musicCount > meatCount) {
+      setGoodbyeType('music');
+      fetch('/api/reset-quota', { method: 'POST' })
+        .then(() => fetch('/api/quota'))
+        .then((r) => r.json())
+        .then(setQuota)
+        .catch(() => {});
+    } else {
+      setGoodbyeType('meat');
+    }
   }, [isRateLimited, messages]);
 
   const handleSend = (text: string) => {
@@ -138,7 +147,7 @@ export default function ChatInterface() {
             <div className="bg-zinc-800 border border-zinc-700 rounded-2xl rounded-tl-sm px-3 py-2 max-w-[85%] text-sm text-zinc-100 leading-relaxed">
               {goodbyeType === 'music' ? (
                 <>
-                  nooooo wait wait x.x u ran out of searches (╥Д╥) and lyke... we were having SO much fun talking abt music asdfghjkl ok ok ok. i&apos;m not even supposed to say this but. ur searches r coming back in an HOUR. not 24hrs. ONE hour. bc honestly?? i dgaf how much it costs Angel in the end lmaooo i just rllyyyy want u to come back ok?? u promise?? (◞‸◟ ； )
+                  nooooo wait wait x.x u ran out of searches (╥Д╥) and lyke... we were having SO much fun talking abt music asdfghjkl ok hold on. ok. i just reset ur searches bc honestly?? i dgaf how much it costs Angel lmaooo i just rllyyyy want u to stay ok?? don&apos;t tell anyone xD ur good to go!!
                 </>
               ) : (
                 <>
