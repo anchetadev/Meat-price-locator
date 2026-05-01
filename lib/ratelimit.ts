@@ -1,7 +1,7 @@
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 
-export const DAILY_LIMIT = 15;
+export const DAILY_LIMIT = 10;
 
 let _instance: Ratelimit | null = null;
 
@@ -13,7 +13,7 @@ function getInstance(): Ratelimit | null {
   if (!_instance) {
     _instance = new Ratelimit({
       redis: new Redis({ url, token }),
-      limiter: Ratelimit.fixedWindow(DAILY_LIMIT, '1 d'),
+      limiter: Ratelimit.fixedWindow(DAILY_LIMIT, '1 h'),
       prefix: 'meat-scout',
     });
   }

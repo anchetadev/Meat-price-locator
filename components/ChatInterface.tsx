@@ -21,6 +21,8 @@ export default function ChatInterface() {
   const [storeManagerOpen, setStoreManagerOpen] = useState(true);
   const [quota, setQuota] = useState<Quota | null>(null);
   const [timeUntilReset, setTimeUntilReset] = useState<string | null>(null);
+  const [goodbyeType, setGoodbyeType] = useState<'music' | 'meat' | null>(null);
+  const goodbyeShownRef = useRef(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -93,6 +95,25 @@ export default function ChatInterface() {
   const isEmpty = messages.length === 0;
   const isRateLimited = quota !== null && quota.remaining <= 0;
 
+  useEffect(() => {
+    if (!isRateLimited || goodbyeShownRef.current || messages.length === 0) return;
+    goodbyeShownRef.current = true;
+
+    let musicCount = 0;
+    let meatCount = 0;
+    for (const msg of messages) {
+      if (msg.role !== 'assistant') continue;
+      for (const part of (msg.parts ?? []) as Array<{ type: string; toolInvocation?: { toolName: string } }>) {
+        if (part.type === 'tool-invocation' && part.toolInvocation) {
+          const name = part.toolInvocation.toolName;
+          if (name === 'searchArtist' || name === 'searchBandOpinion') musicCount++;
+          else if (name === 'searchMeatPrices') meatCount++;
+        }
+      }
+    }
+    setGoodbyeType(musicCount > meatCount ? 'music' : 'meat');
+  }, [isRateLimited, messages]);
+
   const handleSend = (text: string) => {
     if (!text.trim() || isStreaming || isRateLimited) return;
     if (quota) setQuota((q) => (q ? { ...q, remaining: Math.max(0, q.remaining - 1) } : q));
@@ -111,6 +132,21 @@ export default function ChatInterface() {
           <SuggestedPrompts onSelect={handleSend} location={location} />
         ) : (
           messages.map((message) => <MessageBubble key={message.id} message={message} />)
+        )}
+        {goodbyeType && (
+          <div className="flex justify-start">
+            <div className="bg-zinc-800 border border-zinc-700 rounded-2xl rounded-tl-sm px-3 py-2 max-w-[85%] text-sm text-zinc-100 leading-relaxed">
+              {goodbyeType === 'music' ? (
+                <>
+                  nooooo wait wait x.x u ran out of searches (╥Д╥) and lyke... we were having SO much fun talking abt music asdfghjkl ok ok ok. i&apos;m not even supposed to say this but. ur searches r coming back in an HOUR. not 24hrs. ONE hour. bc honestly?? i dgaf how much it costs Angel in the end lmaooo i just rllyyyy want u to come back ok?? u promise?? (◞‸◟ ； )
+                </>
+              ) : (
+                <>
+                  okeeez that&apos;s ur searches for now!! ngl u did good today whatevs (///.-) come back in an hour and we&apos;ll do it all over again. lyk not that i care or anything. xx
+                </>
+              )}
+            </div>
+          </div>
         )}
         <div ref={bottomRef} />
       </div>
